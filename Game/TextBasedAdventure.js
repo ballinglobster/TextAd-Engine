@@ -198,7 +198,7 @@ function getLocationDescription(location)
     if (locationData.locations)
     {
         const exitsParagraph = document.createElement("p");
-        exitsParagraph.className = "location-description";
+        exitsParagraph.className = "exits-description";
         exitsParagraph.textContent = "Exits: " + Object.keys(locationData.locations).join(", ");
         gameOutput.appendChild(exitsParagraph);
     }
@@ -320,6 +320,10 @@ function removeCommandResponseParagraphs()
     // remove location description paragraphs
     const locationDescriptionParagraphs = gameOutput.querySelectorAll("p.location-description");
     locationDescriptionParagraphs.forEach(paragraph => paragraph.remove());
+
+    // remove exits description paragraphs
+    const exitsDescriptionParagraphs = gameOutput.querySelectorAll("p.exits-description");
+    exitsDescriptionParagraphs.forEach(paragraph => paragraph.remove());
 }
 
 function addImageForLocation(location)

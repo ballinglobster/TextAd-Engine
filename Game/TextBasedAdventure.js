@@ -2,7 +2,10 @@ const userInput = document.getElementById('user-input');
 const gameOutput = document.getElementById('game-output');
 
 let waspreviouscommandmove = false;
-let currentLocation = "starting point";
+let currentLocation = "main menu";
+
+let commandHistory = [];
+let historyIndex = -1;
 
 userInput.addEventListener('keydown', function(event)
 {
@@ -29,6 +32,10 @@ userInput.addEventListener('keydown', function(event)
         const command = userInput.value.trim();
         if (command)
         {
+            const commandParagraph = document.createElement("p");
+            commandParagraph.className = "user-command";
+            commandParagraph.textContent = "> " + command;
+            gameOutput.appendChild(commandParagraph);
             const response = decideNextAction(command);
             const paragraph = document.createElement("p");
             paragraph.className = "command-response";
@@ -39,11 +46,6 @@ userInput.addEventListener('keydown', function(event)
     }
 });
 
-// Initial game message
-const initialMessage = "Welcome to the Text-Based Adventure Game! Type your commands below to begin your journey.";
-const initialParagraph = document.createElement("p");
-initialParagraph.textContent = initialMessage;
-gameOutput.appendChild(initialParagraph);
 
 // Implement game data
 // (location, items, inventory, objects, scenery (unmoveable objects), starting point, commands, descriptions, characters, choices)
@@ -51,8 +53,15 @@ const gameData =
 {
     locations: 
     {
+        "main menu":
+        {
+            image: "Images/Location Images/main_menu.png",
+            description: "You are at the main menu. Type 'start' to begin your adventure.",
+            choices: ["start"]
+        },
         "starting point": 
         {
+            image: "Images/Location Images/starting_point.png",
             description: "You are at the starting point of your adventure. There is a path leading north.",
             items: ["map"],
             objects: ["signpost"],
@@ -66,12 +75,17 @@ const gameData =
         },
         "forest":
         {
+            image: "Images/Location Images/forest.jpg",
             description: "You are in a dense forest. The trees tower above you, and you can hear the sounds of wildlife all around.",
             items: [],
             objects: [],
             scenery: ["trees", "bushes"],
             characters: [],
-            choices: ["go south", "look around"]
+            choices: ["go south", "look around"],
+            locations:
+            {
+                "south": "starting point"
+            }
         }
     },
     items:
@@ -108,6 +122,15 @@ const gameData =
     }
 }
 
+// Init game
+initialiseGame();
+
+function initialiseGame()
+{
+    if (getCurrentLocation() !== "main menu") return;
+    moveToLocation("main menu");
+}
+
 function getCurrentLocation()
 {
     return currentLocation;
@@ -116,6 +139,11 @@ function getCurrentLocation()
 function getLocationDescription(location)
 {
     const locationData = gameData.locations[location];
+    const descParagraph = document.createElement("p");
+    descParagraph.className = "location-description";
+    descParagraph.textContent = locationData.description;
+    gameOutput.appendChild(descParagraph);
+
     checkLocationForItemsETC(location);
     if (locationData.items.length > 0)
     {
@@ -124,7 +152,10 @@ function getLocationDescription(location)
         {
             const itemData = gameData.items[item.toLowerCase()];
             const description = itemData.description.toLowerCase();
-            gameOutput.appendChild(document.createElement("p")).textContent = "You see " + description;
+            const itemParagraph = document.createElement("p");
+            itemParagraph.className = "location-description";
+            itemParagraph.textContent = "You see " + description;
+            gameOutput.appendChild(itemParagraph);
         }
     }
     if (locationData.objects.length > 0)
@@ -134,7 +165,10 @@ function getLocationDescription(location)
         {
             const objectData = gameData.objects[object.toLowerCase()];
             const description = objectData.description.toLowerCase();
-            gameOutput.appendChild(document.createElement("p")).textContent = "You notice " + description;
+            const objectParagraph = document.createElement("p");
+            objectParagraph.className = "location-description";
+            objectParagraph.textContent = "You notice " + description;
+            gameOutput.appendChild(objectParagraph);
         }
     }
     // if (locationData.scenery.length > 0)
@@ -151,7 +185,10 @@ function getLocationDescription(location)
         for (const character of locationData.characters)
         {
             const characterData = gameData.characters[character.toLowerCase()];
-            gameOutput.appendChild(document.createElement("p")).textContent = characterData.description;
+            const characterParagraph = document.createElement("p");
+            characterParagraph.className = "location-description";
+            characterParagraph.textContent = characterData.description;
+            gameOutput.appendChild(characterParagraph);
         }
     }
     // if (locationData.choices.length > 0)
@@ -160,9 +197,11 @@ function getLocationDescription(location)
     // }
     if (locationData.locations)
     {
-        gameOutput.appendChild(document.createElement("p")).textContent = "Exits: " + Object.keys(locationData.locations).join(", ");
+        const exitsParagraph = document.createElement("p");
+        exitsParagraph.className = "location-description";
+        exitsParagraph.textContent = "Exits: " + Object.keys(locationData.locations).join(", ");
+        gameOutput.appendChild(exitsParagraph);
     }
-    return locationData.description;
 }
 
 function checkAvailableChoices(location)
@@ -232,6 +271,14 @@ function decideNextAction(command)
             return getObjectDescription(target);
         }
     }
+    else if (lowerCommand === "start" && getCurrentLocation() === "main menu")
+    {
+        return moveToLocation("starting point");
+    }
+    else
+    {
+        return "You can't do that.";
+    }
     
 }
 
@@ -239,6 +286,8 @@ function moveToLocation(location)
 {
     // update player's current location
     currentLocation = location;
+    removeCommandResponseParagraphs();
+    addImageForLocation(location);
     return getLocationDescription(location);
 }
 
@@ -256,4 +305,36 @@ function checkLocationForItemsETC(location)
         scenery: locationData.scenery,
         characters: locationData.characters
     };
+}
+
+function removeCommandResponseParagraphs()
+{
+    // Remove responses
+    const paragraphsToRemove = gameOutput.querySelectorAll("p.command-response");
+    paragraphsToRemove.forEach(paragraph => paragraph.remove());
+
+    // remove user commands
+    const userCommandParagraphs = gameOutput.querySelectorAll("p.user-command");
+    userCommandParagraphs.forEach(paragraph => paragraph.remove());
+
+    // remove location description paragraphs
+    const locationDescriptionParagraphs = gameOutput.querySelectorAll("p.location-description");
+    locationDescriptionParagraphs.forEach(paragraph => paragraph.remove());
+}
+
+function addImageForLocation(location)
+{
+    const locationData = gameData.locations[location];
+
+    // remove previous location images
+    const previousImages = gameOutput.querySelectorAll("img");
+    previousImages.forEach(image => image.remove());
+
+    if (!locationData.image) return;
+    // make sure to add the new image at the top of page
+    const locationImage = document.createElement("img");
+    locationImage.src = locationData.image;
+    locationImage.alt = location + " image";
+    gameOutput.insertBefore(locationImage, gameOutput.firstChild);
+    
 }

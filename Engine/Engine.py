@@ -280,10 +280,8 @@ class Engine:
                     self,
                     new_item_id,
                     {
-                        "name": "",
-                        "description": "",
-                        "location": "",
-                        "properties": {}
+                        "commands": [],
+                        "description": ""
                     }
                 )
                 item_listbox.delete(0, tk.END)

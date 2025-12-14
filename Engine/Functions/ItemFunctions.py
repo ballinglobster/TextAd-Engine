@@ -1,0 +1,90 @@
+import os
+import re
+import json
+from tkinter import messagebox
+from Engine.Functions.TempSave import save_temp_items
+
+def get_items(self):
+    js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
+    if not os.path.exists(js_file_path):
+        messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
+        return None
+    
+    with open(js_file_path, "r", encoding="utf-8") as js_file:
+        js_content = js_file.read()
+
+    match = re.search(
+        r'const gameData\s*=\s*(\{.*?\});',
+        js_content, re.DOTALL
+    )
+    if not match:
+        messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
+        return None
+    
+    game_data_str = match.group(1)
+
+    # Remove trailing commas
+    game_data_str = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
+
+    # Convert JS object to JSON
+    try:
+        game_data = json.loads(game_data_str)
+        items = game_data.get("items", {})
+        return items
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not parse gameData: {e}")
+        return None
+
+def get_item_details(self, item_id):
+    if hasattr(self, "items_data") and self.items_data and item_id in self.items_data:
+        return self.items_data[item_id]
+    else:
+        messagebox.showerror("Error", f"Item '{item_id}' not found.")
+        return None
+    
+def add_another_item(self, item_id, item_data):
+    if not hasattr(self, "items_data") or self.items_data is None:
+        self.items_data = {}
+    self.items_data[item_id] = item_data
+    self.mark_unsaved_changes()
+    save_temp_items(self.items_data, self.temp_path)
+
+def save_items(self, items):
+    js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
+    if not os.path.exists(js_file_path):
+        messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
+        return
+
+    with open(js_file_path, "r", encoding="utf-8") as js_file:
+        js_content = js_file.read()
+
+    # Extract the entire gameData object
+    match = re.search(
+        r'(const gameData\s*=\s*)(\{.*?\})(\s*;)', js_content, re.DOTALL
+    )
+    if not match:
+        messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
+        return
+
+    prefix, game_data_str, suffix = match.groups()
+
+    # Remove trailing commas for JSON parsing
+    game_data_str_clean = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
+
+    try:
+        game_data = json.loads(game_data_str_clean)
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not parse gameData: {e}")
+        return
+
+    # Update items
+    game_data["items"] = items
+
+    # Dump back to JS object string
+    new_game_data_str = json.dumps(game_data, indent=4)
+
+    # Rebuild the JS file
+    new_js_content = js_content[:match.start(2)] + new_game_data_str + js_content[match.end(2):]
+
+    with open(js_file_path, "w", encoding="utf-8") as js_file:
+        js_file.write(new_js_content)

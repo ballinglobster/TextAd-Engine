@@ -1,4 +1,3 @@
-
 import os
 import re
 import shutil
@@ -10,6 +9,10 @@ import sv_ttk
 import ttkbootstrap as ttk
 import json
 
+from Engine.Functions.TempSave import save_temp_locations, save_temp_items, clear_temp_files
+from Engine.Functions.LocationFunctions import get_locations, get_location_details, add_another_location, save_locations
+from Engine.Functions.ItemFunctions import get_items, get_item_details, add_another_item, save_items
+from Engine.Functions.CharacterFunctions import get_characters, get_character_details, add_another_character, save_characters
 
 class Engine:
     # Initialize the engine
@@ -22,6 +25,9 @@ class Engine:
 
         self.create_main_menu()
         self.create_main_interface()
+
+        self.items_data = {}
+        self.locations_data = {}
 
         self.template_path = os.path.join(os.path.dirname(__file__), "TemplateFiles", "Game")
         self.temp_path = os.path.join(os.path.dirname(__file__), "TempFiles")
@@ -161,11 +167,6 @@ class Engine:
 
     # Methods for editing game data
     def edit_locations(self):
-        # Open location editor window
-        # There will be a list of locations to choose from, and an option to add new locations
-        # Inside the location editor, you can add location data:
-        # image, description, items, objects, scenery, characters, choices, and linked locations
-        # It will open a new window with all the location data editable
         Toplevel = tk.Toplevel(self.root)
         Toplevel.title("Edit Locations")
         Toplevel.geometry("600x400")
@@ -177,7 +178,8 @@ class Engine:
         def add_location_and_refresh():
             new_location_id = simpledialog.askstring("New Location", "Enter the ID for the new location:")
             if new_location_id and new_location_id not in self.locations_data:
-                self.add_another_location(
+                add_another_location(
+                    self,
                     new_location_id,
                     {
                         "image": "",
@@ -193,19 +195,6 @@ class Engine:
                 location_listbox.delete(0, tk.END)
                 location_listbox.insert(tk.END, *self.locations_data.keys())
 
-        # add_location_button = ttk.Button(Toplevel, text="Add New Location", command=lambda: self.add_another_location(
-        #     simpledialog.askstring("New Location", "Enter the ID for the new location:"),
-        #     {
-        #         "image": "",
-        #         "description": "",
-        #         "items": [],
-        #         "objects": [],
-        #         "scenery": [],
-        #         "characters": [],
-        #         "choices": [],
-        #         "locations": {}
-        #     }
-        # ))
         add_location_button = ttk.Button(Toplevel, text="Add New Location", command=add_location_and_refresh)
         add_location_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -233,7 +222,7 @@ class Engine:
                 self.locations_data = json.load(f)
                 self.mark_unsaved_changes()
         else:
-            self.locations_data = self.get_locations()
+            self.locations_data = get_locations(self)
         # Load location data
         if self.locations_data:
             location_listbox.insert(tk.END, *self.locations_data.keys())
@@ -247,7 +236,7 @@ class Engine:
                 return
 
             location_name = location_listbox.get(selection[0])
-            location_details = self.get_location_details(location_name)
+            location_details = get_location_details(self, location_name)
 
             for widget in right_frame.winfo_children():
                 widget.destroy()
@@ -287,7 +276,8 @@ class Engine:
         def add_item_and_refresh():
             new_item_id = simpledialog.askstring("New Item", "Enter the ID for the new item:")
             if new_item_id and new_item_id not in self.items_data:
-                self.add_another_item(
+                add_another_item(
+                    self,
                     new_item_id,
                     {
                         "name": "",
@@ -326,7 +316,7 @@ class Engine:
                 self.items_data = json.load(f)
                 self.mark_unsaved_changes()
         else:
-            self.items_data = self.get_items()
+            self.items_data = get_items(self)
         # Load item data
         if self.items_data:
             item_listbox.insert(tk.END, *self.items_data.keys())
@@ -340,7 +330,7 @@ class Engine:
                 return
 
             item_name = item_listbox.get(selection[0])
-            item_details = self.get_item_details(item_name)
+            item_details = get_item_details(self, item_name)
 
             for widget in right_frame.winfo_children():
                 widget.destroy()
@@ -368,189 +358,95 @@ class Engine:
         messagebox.showinfo("Edit Objects", "Object editing interface to be implemented.")
 
     def edit_characters(self):
-        messagebox.showinfo("Edit Characters", "Character editing interface to be implemented.")
+        Toplevel = tk.Toplevel(self.root)
+        Toplevel.title("Edit Characters")
+        Toplevel.geometry("600x400")
 
-    # Location data handling methods
-    def get_locations(self):
-        # Read location data from TextBasedAdventure.js (javascript file)
-        # make sure to separate the location itself and its properties for editing
+        self.character_editor_window = Toplevel
 
+        def add_character_and_refresh():
+            new_character_id = simpledialog.askstring("New Character", "Enter the ID for the new character:")
+            if new_character_id and new_character_id not in self.characters_data:
+                add_another_character(
+                    self,
+                    new_character_id,
+                    {
+                        "dialogue": "",
+                        "description": "",
+                        "commands": []
+                    }
+                )
+                character_listbox.delete(0, tk.END)
+                character_listbox.insert(tk.END, *self.characters_data.keys())
 
-        js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
-        if not os.path.exists(js_file_path):
-            messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
-            return None
+        add_character_button = ttk.Button(Toplevel, text="Add New Character", command=add_character_and_refresh)
+        add_character_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        with open(js_file_path, "r", encoding="utf-8") as js_file:
-            js_content = js_file.read()
-
-        # Extract the gameData object using regex
-        match = re.search(
-            r'const gameData\s*=\s*(\{.*?\});',
-            js_content, re.DOTALL
-        )
-        if not match:
-            messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
-            return None
-
-        game_data_str = match.group(1)
-
-        # Remove trailing commas
-        game_data_str = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
-
-        # Convert JS object to JSON
-        try:
-            game_data = json.loads(game_data_str)
-            locations = game_data.get("locations", {})
-            return locations
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not parse gameData: {e}")
-            return None
-            
-    def get_location_details(self, location_id):
-        if hasattr(self, "locations_data") and self.locations_data and location_id in self.locations_data:
-            return self.locations_data[location_id]
+        left_frame = ttk.Frame(Toplevel, padding="10")
+        left_frame.grid(row=1, column=0, sticky="ns")
+        left_frame.grid_rowconfigure(1, weight=1)
+        left_frame.grid_columnconfigure(0, weight=1)
+        character_listbox = tk.Listbox(left_frame)
+        character_listbox.grid(row=1, column=0, sticky="ns")
+        scrollbar = ttk.Scrollbar(left_frame, orient="vertical", command=character_listbox.yview)
+        scrollbar.grid(row=1, column=1, sticky="ns")
+        character_listbox.config(yscrollcommand=scrollbar.set)
+        # Right frame for character details
+        right_frame = ttk.Frame(Toplevel, padding="10")
+        right_frame.grid(row=1, column=1, sticky="nsew")
+        right_frame.grid_rowconfigure(1, weight=1)
+        right_frame.grid_columnconfigure(0, weight=1)
+        character_details_text = scrolledtext.ScrolledText(right_frame)
+        character_details_text.grid(row=1, column=0, sticky="nsew")
+        # Load temporary character data if exists
+        temp_file = os.path.join(self.temp_path, "temp_characters.json")
+        if os.path.exists(temp_file):
+            with open(temp_file, "r", encoding="utf-8") as f:
+                self.characters_data = json.load(f)
+                self.mark_unsaved_changes()
         else:
-            messagebox.showerror("Error", f"Location '{location_id}' not found.")
-            return None
-    
-    def add_another_location(self, location_id, location_data):
-        if not hasattr(self, "locations_data") or self.locations_data is None:
-            self.locations_data = {}
-        self.locations_data[location_id] = location_data
-        self.mark_unsaved_changes()
-        self.save_temp_locations()
-
-    def save_locations(self, locations):
-        js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
-        if not os.path.exists(js_file_path):
-            messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
-            return
-
-        with open(js_file_path, "r", encoding="utf-8") as js_file:
-            js_content = js_file.read()
-
-        # Extract the entire gameData object
-        match = re.search(
-            r'(const gameData\s*=\s*)(\{.*?\})(\s*;)', js_content, re.DOTALL
-        )
-        if not match:
-            messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
-            return
-
-        prefix, game_data_str, suffix = match.groups()
-
-        # Remove trailing commas for JSON parsing
-        game_data_str_clean = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
-
-        try:
-            game_data = json.loads(game_data_str_clean)
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not parse gameData: {e}")
-            return
-
-        # Update locations
-        game_data["locations"] = locations
-
-        # Dump back to JS object string
-        new_game_data_str = json.dumps(game_data, indent=4)
-
-        # Rebuild the JS file
-        new_js_content = js_content[:match.start(2)] + new_game_data_str + js_content[match.end(2):]
-
-        with open(js_file_path, "w", encoding="utf-8") as js_file:
-            js_file.write(new_js_content)
-
-    # Item data handling methods
-    def get_items(self):
-        js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
-        if not os.path.exists(js_file_path):
-            messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
-            return None
-        
-        with open(js_file_path, "r", encoding="utf-8") as js_file:
-            js_content = js_file.read()
-
-        match = re.search(
-            r'const gameData\s*=\s*(\{.*?\});',
-            js_content, re.DOTALL
-        )
-        if not match:
-            messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
-            return None
-        
-        game_data_str = match.group(1)
-
-        # Remove trailing commas
-        game_data_str = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
-
-        # Convert JS object to JSON
-        try:
-            game_data = json.loads(game_data_str)
-            items = game_data.get("items", {})
-            return items
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not parse gameData: {e}")
-            return None
-
-    def get_item_details(self, item_id):
-        if hasattr(self, "items_data") and self.items_data and item_id in self.items_data:
-            return self.items_data[item_id]
+            self.characters_data = get_characters(self)
+        # Load character data
+        if self.characters_data:
+            character_listbox.insert(tk.END, *self.characters_data.keys())
         else:
-            messagebox.showerror("Error", f"Item '{item_id}' not found.")
-            return None
-        
-    def add_another_item(self, item_id, item_data):
-        if not hasattr(self, "items_data") or self.items_data is None:
-            self.items_data = {}
-        self.items_data[item_id] = item_data
-        self.mark_unsaved_changes()
-        self.save_temp_items()
+            character_listbox.insert(tk.END, "No characters found.")
+        # Function to display character details when selected
+        def show_character_details(event):
+            selection = character_listbox.curselection()
+            if not selection:
+                return
 
-    def save_items(self, items):
-        js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
-        if not os.path.exists(js_file_path):
-            messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
-            return
+            character_name = character_listbox.get(selection[0])
+            character_details = get_character_details(self, character_name)
 
-        with open(js_file_path, "r", encoding="utf-8") as js_file:
-            js_content = js_file.read()
+            for widget in right_frame.winfo_children():
+                widget.destroy()
 
-        # Extract the entire gameData object
-        match = re.search(
-            r'(const gameData\s*=\s*)(\{.*?\})(\s*;)', js_content, re.DOTALL
-        )
-        if not match:
-            messagebox.showerror("Error", "No gameData object found in TextBasedAdventure.js.")
-            return
+            if not character_details:
+                ttk.Label(right_frame, text="No details found for this character.").grid(row=0, column=0, sticky="nsew")
+                return
 
-        prefix, game_data_str, suffix = match.groups()
+            row = 0
+            for key, value in character_details.items():
+                ttk.Label(right_frame, text=f"{key}:", font=("Helvetica", 10, "bold")).grid(row=row, column=0, sticky="w", pady=2)
+                if isinstance(value, list):
+                    entry = ttk.Entry(right_frame, width=40)
+                    entry.insert(0, ", ".join(str(item) for item in value))
+                    entry.grid(row=row, column=1, sticky="w", padx=2)
+                else:
+                    entry = ttk.Entry(right_frame, width=40)
+                    entry.insert(0, str(value))
+                    entry.grid(row=row, column=1, sticky="w", padx=2)
+                row += 1
 
-        # Remove trailing commas for JSON parsing
-        game_data_str_clean = re.sub(r',(\s*[}\]])', r'\1', game_data_str)
-
-        try:
-            game_data = json.loads(game_data_str_clean)
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not parse gameData: {e}")
-            return
-
-        # Update items
-        game_data["items"] = items
-
-        # Dump back to JS object string
-        new_game_data_str = json.dumps(game_data, indent=4)
-
-        # Rebuild the JS file
-        new_js_content = js_content[:match.start(2)] + new_game_data_str + js_content[match.end(2):]
-
-        with open(js_file_path, "w", encoding="utf-8") as js_file:
-            js_file.write(new_js_content)
+        character_listbox.bind("<<ListboxSelect>>", show_character_details)
 
     # Save game changes
     def save_game_changes(self):
-        self.save_locations(self.locations_data)
-        self.save_items(self.items_data)
+        save_locations(self, self.locations_data)
+        save_items(self, self.items_data)
+        save_characters(self, self.characters_data)
         # Remove temporary files after saving
         temp_locations_file = os.path.join(self.temp_path, "temp_locations.json")
         if os.path.exists(temp_locations_file):
@@ -558,6 +454,9 @@ class Engine:
         temp_items_file = os.path.join(self.temp_path, "temp_items.json")
         if os.path.exists(temp_items_file):
             os.remove(temp_items_file)
+        temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
+        if os.path.exists(temp_characters_file):
+            os.remove(temp_characters_file)
 
         self.unsaved_changes = False
         messagebox.showinfo("Save", "Game changes saved successfully!")
@@ -602,6 +501,9 @@ class Engine:
                 temp_items_file = os.path.join(self.temp_path, "temp_items.json")
                 if os.path.exists(temp_items_file):
                     os.remove(temp_items_file)
+                temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
+                if os.path.exists(temp_characters_file):
+                    os.remove(temp_characters_file)
                 return True
             else:  # Cancel
                 return False
@@ -662,7 +564,8 @@ class Engine:
     def check_for_temp_files(self):
         temp_locations_file = os.path.join(self.temp_path, "temp_locations.json")
         temp_items_file = os.path.join(self.temp_path, "temp_items.json")
-        temp_files_exist = os.path.exists(temp_locations_file) or os.path.exists(temp_items_file)
+        temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
+        temp_files_exist = os.path.exists(temp_locations_file) or os.path.exists(temp_items_file) or os.path.exists(temp_characters_file)
 
         if temp_files_exist:
             response = messagebox.askyesno("Load Backup Data", "Your previous session was not closed properly. Do you want to load the backup data?")
@@ -680,27 +583,8 @@ class Engine:
                     os.remove(temp_locations_file)
                 if os.path.exists(temp_items_file):
                     os.remove(temp_items_file)
-
-
-    # TEMPORARY SAVING FUNCTIONS    
-    def save_temp_locations(self):
-        temp_file = os.path.join(self.temp_path, "temp_locations.json")
-        with open(temp_file, "w", encoding="utf-8") as f:
-            json.dump(self.locations_data, f, indent=4)
-    
-    def save_temp_items(self):
-        temp_file = os.path.join(self.temp_path, "temp_items.json")
-        with open(temp_file, "w", encoding="utf-8") as f:
-            json.dump(self.items_data, f, indent=4)
-
-    # CLEAR TEMP FILES  
-    def clear_temp_files(self):
-        temp_locations_file = os.path.join(self.temp_path, "temp_locations.json")
-        if os.path.exists(temp_locations_file):
-            os.remove(temp_locations_file)
-        temp_items_file = os.path.join(self.temp_path, "temp_items.json")
-        if os.path.exists(temp_items_file):
-            os.remove(temp_items_file)
+                if os.path.exists(temp_characters_file):
+                    os.remove(temp_characters_file)
     
 # Run the engine
 if __name__ == "__main__":

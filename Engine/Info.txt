@@ -3,3 +3,5 @@
 ###################################################
 
 This folder holds all of the Engine files.
+
+It is best not to touch these, unless you really know what you are doing.

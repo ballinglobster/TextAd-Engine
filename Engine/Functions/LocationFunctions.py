@@ -2,7 +2,7 @@ import os
 import re
 import json
 from tkinter import messagebox
-from Engine.Functions.TempSave import save_temp_locations
+from Engine.Functions.TempFileFunctions import save_temp_locations
 
 def get_locations(self):
     # Read location data from TextBasedAdventure.js (javascript file)

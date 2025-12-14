@@ -9,7 +9,7 @@ import sv_ttk
 import ttkbootstrap as ttk
 import json
 
-from Engine.Functions.TempSave import save_temp_locations, save_temp_items, clear_temp_files
+from Engine.Functions.TempFileFunctions import save_temp_locations, save_temp_items, clear_temp_files, check_for_temp_files
 from Engine.Functions.LocationFunctions import get_locations, get_location_details, add_another_location, save_locations
 from Engine.Functions.ItemFunctions import get_items, get_item_details, add_another_item, save_items
 from Engine.Functions.CharacterFunctions import get_characters, get_character_details, add_another_character, save_characters
@@ -120,7 +120,7 @@ class Engine:
 
         self.create_game_editor_interface(self.root)
 
-        self.check_for_temp_files()
+        check_for_temp_files(self)
 
     # Create game editor interface
     def create_game_editor_interface(self, parent):
@@ -556,35 +556,6 @@ class Engine:
             parent.grid_rowconfigure(i, weight=0)
         for i in range(parent.grid_size()[0]):
             parent.grid_columnconfigure(i, weight=0)
-
-
-    # Check if there are temporary files, then ask player whether to load
-    # If yes, load temp files
-    # Else, delete temp files
-    def check_for_temp_files(self):
-        temp_locations_file = os.path.join(self.temp_path, "temp_locations.json")
-        temp_items_file = os.path.join(self.temp_path, "temp_items.json")
-        temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
-        temp_files_exist = os.path.exists(temp_locations_file) or os.path.exists(temp_items_file) or os.path.exists(temp_characters_file)
-
-        if temp_files_exist:
-            response = messagebox.askyesno("Load Backup Data", "Your previous session was not closed properly. Do you want to load the backup data?")
-            if response:  # Yes
-                if os.path.exists(temp_locations_file):
-                    with open(temp_locations_file, "r", encoding="utf-8") as f:
-                        self.locations_data = json.load(f)
-                        self.mark_unsaved_changes()
-                if os.path.exists(temp_items_file):
-                    with open(temp_items_file, "r", encoding="utf-8") as f:
-                        self.items_data = json.load(f)
-                        self.mark_unsaved_changes()
-            else:  # No
-                if os.path.exists(temp_locations_file):
-                    os.remove(temp_locations_file)
-                if os.path.exists(temp_items_file):
-                    os.remove(temp_items_file)
-                if os.path.exists(temp_characters_file):
-                    os.remove(temp_characters_file)
     
 # Run the engine
 if __name__ == "__main__":

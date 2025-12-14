@@ -1,7 +1,7 @@
 ###################################################
-############          Engine           ############
+############         Functions         ############
 ###################################################
 
-This folder holds all of the Engine files and folders.
+This folder holds all of the function files.
 
 It is best not to touch these, unless you really know what you are doing.

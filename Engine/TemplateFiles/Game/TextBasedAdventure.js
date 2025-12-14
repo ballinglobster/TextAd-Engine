@@ -49,78 +49,66 @@ userInput.addEventListener('keydown', function(event)
 
 // Implement game data
 // (location, items, inventory, objects, scenery (unmoveable objects), starting point, commands, descriptions, characters, choices)
-const gameData = 
-{
-    locations: 
-    {
-        "main menu":
-        {
-            image: "Images/Location Images/main_menu.png",
-            description: "You are at the main menu. Type 'start' to begin your adventure.",
-            choices: ["start"]
+const gameData = {
+    "locations": {
+        "main menu": {
+            "image": "Images/Location Images/main_menu.png",
+            "description": "You are at the main menu. Type 'start' to begin your adventure.",
+            "items": [],
+            "objects": [],
+            "scenery": [],
+            "characters": [],
+            "choices": ["start"],
+            "connected-locations": {}
         },
-        "starting point": 
-        {
-            image: "Images/Location Images/starting_point.png",
-            description: "You are at the starting point of your adventure. There is a path leading north.",
-            items: ["map"],
-            objects: ["signpost"],
-            scenery: ["trees"],
-            characters: ["Narrator"],
-            choices: ["go north", "look around"],
-            locations:
-            {
+        "starting point": {
+            "image": "Images/Location Images/starting_point.png",
+            "description": "You are at the starting point of your adventure. There is a path leading north.",
+            "items": ["map"],
+            "objects": ["signpost"],
+            "scenery": ["trees"],
+            "characters": ["Narrator"],
+            "choices": ["go north", "look around"],
+            "connected-locations": {
                 "north": "forest"
             }
         },
-        "forest":
-        {
-            image: "Images/Location Images/forest.jpg",
-            description: "You are in a dense forest. The trees tower above you, and you can hear the sounds of wildlife all around.",
-            items: [],
-            objects: [],
-            scenery: ["trees", "bushes"],
-            characters: [],
-            choices: ["go south", "look around"],
-            locations:
-            {
+        "forest": {
+            "image": "Images/Location Images/forest.jpg",
+            "description": "You are in a dense forest. The trees tower above you, and you can hear the sounds of wildlife all around.",
+            "items": [],
+            "objects": [],
+            "scenery": ["trees", "bushes"],
+            "characters": [],
+            "choices": ["go south", "look around"],
+            "connected-locations": {
                 "south": "starting point"
             }
         }
     },
-    items:
-    {
-        "map":
-        {
-            commands: ["examine", "take"],
-            description: "A worn-out map showing the layout of the surrounding area."
+    "items": {
+        "map": {
+            "commands": ["examine", "take"],
+            "description": "A worn-out map showing the layout of the surrounding area."
         }
     },
-    objects:
-    {
-        "signpost":
-        {
-            commands: ["examine"],
-            description: "A wooden signpost with directions to nearby locations."
+    "objects": {
+        "signpost": {
+            "commands": ["examine"],
+            "description": "A wooden signpost with directions to nearby locations."
         }
     },
-    characters:
-    {
-        "narrator":
-        {
-            dialogue: ["Welcome to your adventure!"],
-            commands: ["talk to"],
-            description: "You feel the presence of the narrator."
+    "characters": {
+        "narrator": {
+            "dialogue": ["Welcome to your adventure!"],
+            "commands": ["talk to"],
+            "description": "You feel the presence of the narrator."
         }
     },
-    inventory: 
-    {
-        items: 
-        [
-            
-        ]
+    "inventory": {
+        "items": []
     }
-}
+};
 
 // Init game
 initialiseGame();

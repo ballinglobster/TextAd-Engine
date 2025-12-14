@@ -1,0 +1,14 @@
+###################################################
+############      Temporary Files      ############
+###################################################
+
+This folder is used to save temporary changes to files.
+
+How it works:
+
+1. User creates new data (e.g. location)
+2. Engine saves new data as a JSON file
+3.
+    a. When user saves game, implement JSON data into the JavaScript file and delete JSON file
+    b. When user quits and confirms they do not want to save data, delete JSON file
+    c. If application quits unexpectedly or improperly, prompt user to load or delete backup data

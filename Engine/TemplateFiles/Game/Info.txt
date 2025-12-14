@@ -1,0 +1,34 @@
+###################################################
+############      Template Files       ############
+###################################################
+
+This folder is used for new projects.
+
+All new projects will use the files inside this folder.
+
+WARNING:
+Removing these files will break the editor!
+
+However,
+You can always change the files.
+
+Files:
+- index.html:
+    This will display the game, easy to customise.
+    For more info on how .html works: https://www.w3schools.com/html/
+
+- stylesheet.css:
+    This will apply styles to the index.html files.
+    For more info on how .css works: https://www.w3schools.com/css/
+
+- TextBasedAdventure.js
+    This has all the gameplay logic for the game, without this file there is no game.
+    For more info on how JavaScript works: https://www.w3schools.com/Js/
+
+Folders:
+- \Game:
+    This folder holds all the game files
+
+- \Images:
+    This folder will hold all the images for the game.
+    This is purely for organising, these images could technically be anywhere within the Game folder.

@@ -2,9 +2,9 @@ import os
 import re
 import json
 from tkinter import messagebox
-from Engine.Functions.TempFileFunctions import save_temp_locations
+from Engine.Functions.TempFileFunctions import save_temp_objects
 
-def get_locations(self):
+def get_objects(self):
     js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
     if not os.path.exists(js_file_path):
         messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
@@ -30,27 +30,27 @@ def get_locations(self):
     # Convert JS object to JSON
     try:
         game_data = json.loads(game_data_str)
-        locations = game_data.get("locations", {})
-        return locations
+        objects = game_data.get("objects", {})
+        return objects
     except Exception as e:
         messagebox.showerror("Error", f"Could not parse gameData: {e}")
         return None
         
-def get_location_details(self, location_id):
-    if hasattr(self, "locations_data") and self.locations_data and location_id in self.locations_data:
-        return self.locations_data[location_id]
+def get_object_details(self, object_id):
+    if hasattr(self, "objects_data") and self.objects_data and object_id in self.objects_data:
+        return self.objects_data[object_id]
     else:
-        messagebox.showerror("Error", f"Location '{location_id}' not found.")
+        messagebox.showerror("Error", f"Object '{object_id}' not found.")
         return None
 
-def add_another_location(self, location_id, location_data):
-    if not hasattr(self, "locations_data") or self.locations_data is None:
-        self.locations_data = {}
-    self.locations_data[location_id] = location_data
+def add_another_object(self, object_id, object_data):
+    if not hasattr(self, "objects_data") or self.objects_data is None:
+        self.objects_data = {}
+    self.objects_data[object_id] = object_data
     self.mark_unsaved_changes()
-    save_temp_locations(self.locations_data, self.temp_path)
+    save_temp_objects(self.objects_data, self.temp_path)
 
-def save_locations(self, locations):
+def save_objects(self, objects):
     js_file_path = os.path.join(self.current_game_path, "TextBasedAdventure.js")
     if not os.path.exists(js_file_path):
         messagebox.showerror("Error", "TextBasedAdventure.js file not found.")
@@ -78,8 +78,8 @@ def save_locations(self, locations):
         messagebox.showerror("Error", f"Could not parse gameData: {e}")
         return
 
-    # Update locations
-    game_data["locations"] = locations
+    # Update objects
+    game_data["objects"] = objects
 
     # Dump back to JS object string
     new_game_data_str = json.dumps(game_data, indent=4)

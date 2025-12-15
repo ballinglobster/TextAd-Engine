@@ -18,6 +18,11 @@ def save_temp_characters(characters_data, temp_path):
     with open(temp_file, "w", encoding="utf-8") as f:
         json.dump(characters_data, f, indent=4)
 
+def save_temp_objects(objects_data, temp_path):
+    temp_file = os.path.join(temp_path, "temp_objects.json")
+    with open(temp_file, "w", encoding="utf-8") as f:
+        json.dump(objects_data, f, indent=4)
+
 # CLEAR TEMP FILES  
 def clear_temp_files(temp_path):
     temp_locations_file = os.path.join(temp_path, "temp_locations.json")

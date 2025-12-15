@@ -9,10 +9,11 @@ import sv_ttk
 import ttkbootstrap as ttk
 import json
 
-from Engine.Functions.TempFileFunctions import save_temp_locations, save_temp_items, clear_temp_files, check_for_temp_files
+from Engine.Functions.TempFileFunctions import check_for_temp_files
 from Engine.Functions.LocationFunctions import get_locations, get_location_details, add_another_location, save_locations
 from Engine.Functions.ItemFunctions import get_items, get_item_details, add_another_item, save_items
 from Engine.Functions.CharacterFunctions import get_characters, get_character_details, add_another_character, save_characters
+from Engine.Functions.ObjectFunctions import get_objects, get_object_details, add_another_object, save_objects
 
 class Engine:
     # Initialize the engine
@@ -353,7 +354,88 @@ class Engine:
 
 
     def edit_objects(self):
-        messagebox.showinfo("Edit Objects", "Object editing interface to be implemented.")
+        Toplevel = tk.Toplevel(self.root)
+        Toplevel.title("Edit Objects")
+        Toplevel.geometry("600x400")
+
+        self.object_editor_window = Toplevel
+
+        def add_object_and_refresh():
+            new_object_id = simpledialog.askstring("New Object", "Enter the ID for the new object:")
+            if new_object_id and new_object_id not in self.objects_data:
+                add_another_object(
+                    self,
+                    new_object_id,
+                    {
+                        "commands": [],
+                        "description": ""
+                    }
+                )
+                object_listbox.delete(0, tk.END)
+                object_listbox.insert(tk.END, *self.objects_data.keys())
+
+        add_object_button = ttk.Button(Toplevel, text="Add New Object", command=add_object_and_refresh)
+        add_object_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        left_frame = ttk.Frame(Toplevel, padding="10")
+        left_frame.grid(row=1, column=0, sticky="ns")
+        left_frame.grid_rowconfigure(1, weight=1)
+        left_frame.grid_columnconfigure(0, weight=1)
+        object_listbox = tk.Listbox(left_frame)
+        object_listbox.grid(row=1, column=0, sticky="ns")
+        scrollbar = ttk.Scrollbar(left_frame, orient="vertical", command=object_listbox.yview)
+        scrollbar.grid(row=1, column=1, sticky="ns")
+        object_listbox.config(yscrollcommand=scrollbar.set)
+        # Right frame for object details
+        right_frame = ttk.Frame(Toplevel, padding="10")
+        right_frame.grid(row=1, column=1, sticky="nsew")
+        right_frame.grid_rowconfigure(1, weight=1)
+        right_frame.grid_columnconfigure(0, weight=1)
+        object_details_text = scrolledtext.ScrolledText(right_frame)
+        object_details_text.grid(row=1, column=0, sticky="nsew")
+
+        # Load temporary object data if exists
+        temp_file = os.path.join(self.temp_path, "temp_objects.json")
+        if os.path.exists(temp_file):
+            with open(temp_file, "r", encoding="utf-8") as f:
+                self.objects_data = json.load(f)
+                self.mark_unsaved_changes()
+        else:
+            self.objects_data = get_objects(self)
+        # Load object data
+        if self.objects_data:
+            object_listbox.insert(tk.END, *self.objects_data.keys())
+        else:
+            object_listbox.insert(tk.END, "No objects found.")
+        # Function to display object details when selected
+        def show_object_details(event):
+            selection = object_listbox.curselection()
+            if not selection:
+                return
+
+            object_name = object_listbox.get(selection[0])
+            object_details = get_object_details(self, object_name)
+
+            for widget in right_frame.winfo_children():
+                widget.destroy()
+
+            if not object_details:
+                ttk.Label(right_frame, text="No details found for this object.").grid(row=0, column=0, sticky="nsew")
+                return
+
+            row = 0
+            for key, value in object_details.items():
+                ttk.Label(right_frame, text=f"{key}:", font=("Helvetica", 10, "bold")).grid(row=row, column=0, sticky="w", pady=2)
+                if isinstance(value, dict):
+                    entry = ttk.Entry(right_frame, width=40)
+                    entry.insert(0, ", ".join(f"{k}: {v}" for k, v in value.items()))
+                    entry.grid(row=row, column=1, sticky="w", padx=2)
+                else:
+                    entry = ttk.Entry(right_frame, width=40)
+                    entry.insert(0, str(value))
+                    entry.grid(row=row, column=1, sticky="w", padx=2)
+                row += 1
+        object_listbox.bind("<<ListboxSelect>>", show_object_details)
 
     def edit_characters(self):
         Toplevel = tk.Toplevel(self.root)

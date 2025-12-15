@@ -5,3 +5,22 @@
 This folder holds all of the function files.
 
 It is best not to touch these, unless you really know what you are doing.
+
+Files:
+- __init__.py:
+    Empty init file for export.
+
+- CharacterFunctions.py:
+    Holds all functions that the character editor menu will access.
+
+- ItemFunctions.py:
+    Holds all functions that the item editor menu will access.
+
+- LocationFunctions.py:
+    Holds all functions that the location editor menu will access.
+
+- ObjectFunctions.py:
+    Holds all functions that the object editor menu will access.
+
+- TempFileFunctions.py:
+    Holds all functions for backup data saving. Temporary files will also be used for loading the menus if unsaved.

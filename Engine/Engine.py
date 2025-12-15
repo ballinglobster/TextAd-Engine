@@ -537,6 +537,9 @@ class Engine:
         temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
         if os.path.exists(temp_characters_file):
             os.remove(temp_characters_file)
+        temp_objects_file = os.path.join(self.temp_path, "temp_objects.json")
+        if os.path.exists(temp_objects_file):
+            os.remove(temp_objects_file)
 
         self.unsaved_changes = False
         messagebox.showinfo("Save", "Game changes saved successfully!")
@@ -549,6 +552,21 @@ class Engine:
             title = self.editor_window.title()
             if "*" in title:
                 self.editor_window.title(title.replace(" * (Unsaved Changes)", ""))
+
+        if hasattr(self, "item_editor_window") and self.item_editor_window.winfo_exists():
+            title = self.item_editor_window.title()
+            if "*" in title:
+                self.item_editor_window.title(title.replace(" * (Unsaved Changes)", ""))
+        
+        if hasattr(self, "object_editor_window") and self.object_editor_window.winfo_exists():
+            title = self.object_editor_window.title()
+            if "*" in title:
+                self.object_editor_window.title(title.replace(" * (Unsaved Changes)", ""))
+
+        if hasattr(self, "character_editor_window") and self.character_editor_window.winfo_exists():
+            title = self.character_editor_window.title()
+            if "*" in title:
+                self.character_editor_window.title(title.replace(" * (Unsaved Changes)", ""))
         
     # Playtest the game
     def playtest_game(self):
@@ -584,6 +602,9 @@ class Engine:
                 temp_characters_file = os.path.join(self.temp_path, "temp_characters.json")
                 if os.path.exists(temp_characters_file):
                     os.remove(temp_characters_file)
+                temp_objects_file = os.path.join(self.temp_path, "temp_objects.json")
+                if os.path.exists(temp_objects_file):
+                    os.remove(temp_objects_file)
                 return True
             else:  # Cancel
                 return False
@@ -606,6 +627,11 @@ class Engine:
             title = self.item_editor_window.title()
             if "*" not in title:
                 self.item_editor_window.title(title + " * (Unsaved Changes)")
+
+        if hasattr(self, "object_editor_window") and self.object_editor_window.winfo_exists():
+            title = self.object_editor_window.title()
+            if "*" not in title:
+                self.object_editor_window.title(title + " * (Unsaved Changes)")
 
     def check_if_unsaved(self):
         return self.unsaved_changes

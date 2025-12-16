@@ -155,15 +155,18 @@ class Engine:
         for i in range(2):
             self.editor_frame.grid_columnconfigure(i, weight=1)
 
-
+        # Style for buttons
+        self.Style = ttk.Style()
+        self.Style.configure("Editor.TButton", font=("Helvetica", 18))
+        
         # Buttons for editing locations, items, objects, characters
-        location_button = ttk.Button(self.editor_frame, text="Edit Locations", command=self.edit_locations)
+        location_button = ttk.Button(self.editor_frame, text="Edit Locations", command=self.edit_locations, style="Editor.TButton")
         location_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        item_button = ttk.Button(self.editor_frame, text="Edit Items", command=self.edit_items)
+        item_button = ttk.Button(self.editor_frame, text="Edit Items", command=self.edit_items, style="Editor.TButton")
         item_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        object_button = ttk.Button(self.editor_frame, text="Edit Objects", command=self.edit_objects)
+        object_button = ttk.Button(self.editor_frame, text="Edit Objects", command=self.edit_objects, style="Editor.TButton")
         object_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-        character_button = ttk.Button(self.editor_frame, text="Edit Characters", command=self.edit_characters)
+        character_button = ttk.Button(self.editor_frame, text="Edit Characters", command=self.edit_characters, style="Editor.TButton")
         character_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
 
     # Methods for editing game data

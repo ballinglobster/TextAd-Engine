@@ -150,7 +150,7 @@ class Engine:
         # Configure grid weights for scaling
         parent.grid_rowconfigure(1, weight=1)
         parent.grid_columnconfigure(0, weight=1)
-        for i in range(2):
+        for i in range(3):
             self.editor_frame.grid_rowconfigure(i, weight=1)
         for i in range(2):
             self.editor_frame.grid_columnconfigure(i, weight=1)
@@ -158,7 +158,7 @@ class Engine:
         # Style for buttons
         self.Style = ttk.Style()
         self.Style.configure("Editor.TButton", font=("Helvetica", 18))
-        
+
         # Buttons for editing locations, items, objects, characters
         location_button = ttk.Button(self.editor_frame, text="Edit Locations", command=self.edit_locations, style="Editor.TButton")
         location_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
@@ -168,6 +168,12 @@ class Engine:
         object_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         character_button = ttk.Button(self.editor_frame, text="Edit Characters", command=self.edit_characters, style="Editor.TButton")
         character_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+
+        # Buttons for editing HTML and CSS files for styling
+        html_button = ttk.Button(self.editor_frame, text="Edit Website", command=self.edit_html, style="Editor.TButton")
+        html_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        css_button = ttk.Button(self.editor_frame, text="Edit Styling", command=self.edit_css, style="Editor.TButton")
+        css_button.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
 
     # Methods for editing game data
     def edit_locations(self):
@@ -524,6 +530,26 @@ class Engine:
                 row += 1
 
         character_listbox.bind("<<ListboxSelect>>", show_character_details)
+    
+    def edit_html(self):
+        if self.current_game_path:
+            html_file = os.path.join(self.current_game_path, "index.html")
+            if os.path.exists(html_file):
+                webbrowser.open_new_tab(f"file://{html_file}")
+            else:
+                messagebox.showerror("Error", "HTML file not found in the current game directory.")
+        else:
+            messagebox.showerror("Error", "No game is currently open for editing.")
+
+    def edit_css(self):
+        if self.current_game_path:
+            css_file = os.path.join(self.current_game_path, "stylesheet.css")
+            if os.path.exists(css_file):
+                webbrowser.open_new_tab(f"file://{css_file}")
+            else:
+                messagebox.showerror("Error", "CSS file not found in the current game directory.")
+        else:
+            messagebox.showerror("Error", "No game is currently open for editing.")
 
     # Save game changes
     def save_game_changes(self):

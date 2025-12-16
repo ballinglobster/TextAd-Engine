@@ -127,14 +127,14 @@ class Engine:
     def create_game_editor_interface(self, parent):
         self.reset_grid_weights(parent)
         menu_frame = ttk.Frame(parent)
-        menu_frame.grid(row=0, column=0, sticky="ew")
+        menu_frame.grid(row=0, column=0, sticky="nsew")
         menu_frame.columnconfigure(0, weight=1)
         menu_frame.columnconfigure(1, weight=0)
 
         # Title with Background that spans the entire width
         title_label = ttk.Label(menu_frame, text="TextAd Engine - Game Editor", font=("Helvetica", 14), anchor="w")
         title_label.configure(background="#101010")
-        title_label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=0, pady=0)
+        title_label.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=0, pady=0)
 
         # Left-side buttons
         left_frame = ttk.Frame(menu_frame)
@@ -150,7 +150,7 @@ class Engine:
         # Configure grid weights for scaling
         parent.grid_rowconfigure(1, weight=1)
         parent.grid_columnconfigure(0, weight=1)
-        for i in range(3):
+        for i in range(2):
             self.editor_frame.grid_rowconfigure(i, weight=1)
         for i in range(2):
             self.editor_frame.grid_columnconfigure(i, weight=1)
@@ -158,13 +158,13 @@ class Engine:
 
         # Buttons for editing locations, items, objects, characters
         location_button = ttk.Button(self.editor_frame, text="Edit Locations", command=self.edit_locations)
-        location_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        location_button.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
         item_button = ttk.Button(self.editor_frame, text="Edit Items", command=self.edit_items)
-        item_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+        item_button.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
         object_button = ttk.Button(self.editor_frame, text="Edit Objects", command=self.edit_objects)
-        object_button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        object_button.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         character_button = ttk.Button(self.editor_frame, text="Edit Characters", command=self.edit_characters)
-        character_button.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
+        character_button.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
 
     # Methods for editing game data
     def edit_locations(self):

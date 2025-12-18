@@ -8,6 +8,7 @@ import subprocess
 import sv_ttk
 import ttkbootstrap as ttk
 import json
+import tkinter.font as TkFont
 
 from Engine.Functions.TempFileFunctions import check_for_temp_files
 from Engine.Functions.LocationFunctions import get_locations, get_location_details, add_another_location, save_locations
@@ -15,6 +16,7 @@ from Engine.Functions.ItemFunctions import get_items, get_item_details, add_anot
 from Engine.Functions.CharacterFunctions import get_characters, get_character_details, add_another_character, save_characters
 from Engine.Functions.ObjectFunctions import get_objects, get_object_details, add_another_object, save_objects
 
+                
 class Engine:
     # Initialize the engine
     def __init__(self, root):
@@ -62,8 +64,15 @@ class Engine:
         self.main_frame.grid_columnconfigure(0, weight=1)
 
         # Title label
-        title_label = ttk.Label(self.main_frame, text="TextAd Engine", font=("Helvetica", 16))
+        title_label = ttk.Label(self.main_frame, text="TextAd Engine", font=("Helvetica", 16), anchor="center")
         title_label.grid(row=0, column=0, padx=10, pady=10)
+        
+        # auto scale font size based on window size
+        # def resize_title(event):
+        #     new_size = max(16, int(event.width / 12))
+        #     title_label.config(font=("Helvetica", new_size))
+
+        # title_label.bind("<Configure>", resize_title)
 
         # Buttons for New Game, Open Game, Quit (all same size, scalable)
         new_game_button = ttk.Button(self.main_frame, text="New Game", command=self.new_game)
@@ -692,9 +701,11 @@ class Engine:
         for i in range(parent.grid_size()[0]):
             parent.grid_columnconfigure(i, weight=0)
     
+
 # Run the engine
 if __name__ == "__main__":
-    root = ttk.Window(themename="textadengine")
+    # Resize fonts
+    root = ttk.Window(themename="textadengine", minsize=(400, 200))
     engine = Engine(root)
     root.protocol("WM_DELETE_WINDOW", engine.on_exit)
     root.mainloop()
